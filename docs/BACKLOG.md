@@ -1,0 +1,96 @@
+# Backlog inicial
+
+## EPIC 0 — Fundação
+
+- [ ] configurar monorepo e CI
+- [ ] configurar PostgreSQL/migrations
+- [ ] settings/env
+- [ ] logging estruturado
+- [ ] padrão de erros API
+
+## EPIC 1 — Tenancy e identidade
+
+- [ ] company
+- [ ] branch
+- [ ] user
+- [ ] membership
+- [ ] role/permission
+- [ ] tenant context
+- [ ] testes de isolamento
+
+## EPIC 2 — Frota
+
+- [ ] CRUD veículo
+- [ ] CRUD motorista
+- [ ] vínculo motorista/usuário
+- [ ] histórico de status do veículo
+
+## EPIC 3 — Form Builder
+
+- [ ] forms
+- [ ] draft/version
+- [ ] fields
+- [ ] validation config
+- [ ] publish
+- [ ] archive
+- [ ] preview
+
+## EPIC 4 — Form Runner
+
+- [ ] criar submissão
+- [ ] salvar draft
+- [ ] enviar
+- [ ] respostas tipadas
+- [ ] validações
+- [ ] mobile UX
+
+## EPIC 5 — PERIOD / tempo real
+
+- [ ] start period
+- [ ] finish period
+- [ ] elapsed duration
+- [ ] current status projection
+- [ ] impedir concorrência quando configurado
+- [ ] correções auditadas
+- [ ] board em tempo real/polling inicial
+
+## EPIC 6 — Relações e cálculos
+
+- [ ] SUBFORM
+- [ ] parent/child submissions
+- [ ] COUNT children
+- [ ] SUM child field
+- [ ] arithmetic calculations
+- [ ] divide-by-zero policy
+
+## EPIC 7 — Templates concreteira
+
+- [ ] FORM01 Jornada diária
+- [ ] FORM02 Ciclo de entrega
+- [ ] FORM03 Abastecimento
+- [ ] template checklist pré-operação
+
+## EPIC 8 — Dashboards piloto
+
+- [ ] status ao vivo
+- [ ] espera em obra
+- [ ] entregas/viagens
+- [ ] volume m³
+- [ ] diesel
+- [ ] L/m³
+- [ ] tendência diária
+
+## EPIC 9 — Evidências
+
+- [ ] S3 upload
+- [ ] attachment policies
+- [ ] foto opcional/obrigatória/desativada
+- [ ] metadata e checksum
+
+## EPIC 10 — Piloto
+
+- [ ] importação CSV para cadastros
+- [ ] feature flags
+- [ ] feedback in-app simples
+- [ ] telemetria de produto
+- [ ] relatório de uso do piloto

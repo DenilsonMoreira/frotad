@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-frotad}
+      POSTGRES_USER: ${POSTGRES_USER:-frotad}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-frotad}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-frotad} -d ${POSTGRES_DB:-frotad}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-frotad}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-frotad-local-secret}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://frotad:frotad@postgres:5432/frotad
+      REDIS_URL: redis://redis:6379/0
+      API_CORS_ORIGINS: http://localhost:3000
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_BUCKET: frotad-local
+      S3_ACCESS_KEY: frotad
+      S3_SECRET_KEY: frotad-local-secret
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./apps/web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  minio_data:
