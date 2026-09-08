@@ -2,21 +2,21 @@
 
 ## EPIC 0 — Fundação
 
-- [ ] configurar monorepo e CI
-- [ ] configurar PostgreSQL/migrations
-- [ ] settings/env
-- [ ] logging estruturado
-- [ ] padrão de erros API
+- [x] configurar monorepo e CI
+- [x] configurar PostgreSQL/migrations
+- [x] settings/env
+- [x] logging estruturado
+- [x] padrão de erros API
 
 ## EPIC 1 — Tenancy e identidade
 
-- [ ] company
-- [ ] branch
-- [ ] user
-- [ ] membership
-- [ ] role/permission
-- [ ] tenant context
-- [ ] testes de isolamento
+- [x] company
+- [x] branch
+- [x] user
+- [x] membership
+- [x] role/permission
+- [x] tenant context
+- [x] testes de isolamento
 
 ## EPIC 2 — Frota
 

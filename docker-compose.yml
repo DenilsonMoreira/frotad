@@ -35,6 +35,7 @@ services:
   api:
     build:
       context: ./apps/api
+    command: sh -c "alembic upgrade head && uvicorn frotad.main:app --host 0.0.0.0 --port 8000"
     environment:
       APP_ENV: development
       DATABASE_URL: postgresql+psycopg://frotad:frotad@postgres:5432/frotad

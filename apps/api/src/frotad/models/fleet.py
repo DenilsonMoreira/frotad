@@ -1,8 +1,16 @@
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import (
+    Boolean,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
+)
+from sqlalchemy import Uuid as UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from frotad.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
@@ -10,13 +18,18 @@ from frotad.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 
 class Vehicle(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "vehicles"
+    __table_args__ = (
+        UniqueConstraint("company_id", "fleet_number"),
+        ForeignKeyConstraint(["company_id", "branch_id"], ["branches.company_id", "branches.id"]),
+    )
 
     company_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
-    branch_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("branches.id", ondelete="SET NULL"), index=True
-    )
+    branch_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), index=True)
     fleet_number: Mapped[str] = mapped_column(String(80), nullable=False)
     plate: Mapped[str | None] = mapped_column(String(10), index=True)
     model: Mapped[str | None] = mapped_column(String(120))
@@ -28,9 +41,18 @@ class Vehicle(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class Driver(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "drivers"
+    __table_args__ = (
+        UniqueConstraint("company_id", "employee_code"),
+        ForeignKeyConstraint(
+            ["company_id", "user_id"], ["memberships.company_id", "memberships.user_id"]
+        ),
+    )
 
     company_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+        UUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), index=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)

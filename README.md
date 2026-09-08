@@ -170,3 +170,7 @@ O arquivo [`AGENTS.md`](AGENTS.md) define as regras de domínio e engenharia que
 ## Status
 
 Projeto em fase inicial de produto/MVP. As hipóteses comerciais e operacionais ainda precisam ser validadas em piloto real.
+
+## Fundação implementada
+
+Consulte [ADR 001](docs/ADR-001-foundation.md) para API autenticada, migrations, bootstrap administrativo e testes. Formulários e telas do starter ainda são esboços.
