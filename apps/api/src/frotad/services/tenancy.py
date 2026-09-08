@@ -24,12 +24,12 @@ class TenantContext:
 
     def require(self, capability: str) -> None:
         permissions = {
-            Role.OWNER: {"fleet:read"},
-            Role.ADMIN: {"fleet:read"},
-            Role.MANAGER: {"fleet:read"},
+            Role.OWNER: {"fleet:read", "forms:read", "forms:write"},
+            Role.ADMIN: {"fleet:read", "forms:read", "forms:write"},
+            Role.MANAGER: {"fleet:read", "forms:read", "forms:write"},
             Role.DISPATCHER: {"fleet:read"},
             Role.MAINTENANCE: {"fleet:read"},
-            Role.VIEWER: {"fleet:read"},
+            Role.VIEWER: {"fleet:read", "forms:read"},
             Role.DRIVER: set(),
         }
         if capability not in permissions[self.role]:
