@@ -3,12 +3,15 @@ from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 
 import pytest
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from alembic import command
 from frotad.api.dependencies import get_db
+from frotad.core.config import settings
 from frotad.main import app
 from frotad.models import AccessToken, Branch, Company, Driver, Membership, User, Vehicle
 from frotad.models.base import Base
@@ -73,3 +76,18 @@ def client(db):
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def migrated_engine(tmp_path):
+    original = settings.database_url
+    settings.database_url = os.getenv("TEST_DATABASE_URL", f"sqlite:///{tmp_path / 'forms.db'}")
+    config = Config("alembic.ini")
+    engine = create_engine(settings.database_url)
+    command.upgrade(config, "head")
+    try:
+        yield engine
+    finally:
+        command.downgrade(config, "base")
+        engine.dispose()
+        settings.database_url = original

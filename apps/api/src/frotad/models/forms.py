@@ -49,7 +49,10 @@ class FieldType(str, enum.Enum):
 
 class Form(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "forms"
-    __table_args__ = (UniqueConstraint("company_id", "code"),)
+    __table_args__ = (
+        UniqueConstraint("company_id", "code"),
+        Index("uq_forms_company_id_id", "company_id", "id", unique=True),
+    )
     company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"), index=True)
     code: Mapped[str] = mapped_column(String(50))
     name: Mapped[str] = mapped_column(String(200))
@@ -63,6 +66,7 @@ class FormVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "form_versions"
     __table_args__ = (
         UniqueConstraint("form_id", "version"),
+        Index("uq_form_versions_form_id_id", "form_id", "id", unique=True),
         Index(
             "uq_form_versions_draft",
             "form_id",
@@ -82,7 +86,10 @@ class FormVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class FormField(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "form_fields"
-    __table_args__ = (UniqueConstraint("form_version_id", "key"),)
+    __table_args__ = (
+        UniqueConstraint("form_version_id", "key"),
+        Index("uq_form_fields_version_id_id", "form_version_id", "id", unique=True),
+    )
     form_version_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("form_versions.id"), index=True)
     key: Mapped[str] = mapped_column(String(80))
     label: Mapped[str] = mapped_column(String(200))

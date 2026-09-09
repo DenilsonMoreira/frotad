@@ -24,13 +24,34 @@ class TenantContext:
 
     def require(self, capability: str) -> None:
         permissions = {
-            Role.OWNER: {"fleet:read", "forms:read", "forms:write"},
-            Role.ADMIN: {"fleet:read", "forms:read", "forms:write"},
-            Role.MANAGER: {"fleet:read", "forms:read", "forms:write"},
-            Role.DISPATCHER: {"fleet:read"},
+            Role.OWNER: {
+                "fleet:read",
+                "forms:read",
+                "forms:write",
+                "runner:read",
+                "runner:write",
+                "runner:create",
+            },
+            Role.ADMIN: {
+                "fleet:read",
+                "forms:read",
+                "forms:write",
+                "runner:read",
+                "runner:write",
+                "runner:create",
+            },
+            Role.MANAGER: {
+                "fleet:read",
+                "forms:read",
+                "forms:write",
+                "runner:read",
+                "runner:write",
+                "runner:create",
+            },
+            Role.DISPATCHER: {"fleet:read", "runner:read", "runner:write", "runner:create"},
             Role.MAINTENANCE: {"fleet:read"},
-            Role.VIEWER: {"fleet:read", "forms:read"},
-            Role.DRIVER: set(),
+            Role.VIEWER: {"fleet:read", "forms:read", "runner:read"},
+            Role.DRIVER: {"runner:read", "runner:write"},
         }
         if capability not in permissions[self.role]:
             raise DomainError(403, "permission_denied")
