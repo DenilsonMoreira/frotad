@@ -101,3 +101,7 @@ Política por campo/processo:
 - Checklist pré-operação
 - Ocorrência (P1)
 - Manutenção preventiva (P1)
+
+## Contratos implementados
+
+Veja [ADR 0006](adr/0006-subforms-calculations.md) para config.expression, vínculo de SUBFORM com versão publicada, regras de agregação e snapshots de cálculos.

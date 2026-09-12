@@ -3,8 +3,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 
 from frotad.api.dependencies import get_db, get_tenant
-from frotad.schemas.runner import AnswerWrite, EmptyCommand, SubmissionCreate, SubmissionRead
+from frotad.schemas.runner import (
+    AnswerWrite,
+    ChildCreate,
+    EmptyCommand,
+    SubmissionCreate,
+    SubmissionRead,
+)
 from frotad.services import runner
+from frotad.services.subforms import create_child
 
 router = APIRouter(tags=["runner"])
 
@@ -72,3 +79,18 @@ def submit(
     context=Depends(get_tenant),
 ):
     return runner.submit(db, context, submission_id)
+
+
+@router.post(
+    "/submissions/{submission_id}/subforms/{field_id}/children",
+    response_model=SubmissionRead,
+    status_code=201,
+)
+def child(
+    submission_id: UUID,
+    field_id: UUID,
+    payload: ChildCreate,
+    db=Depends(get_db),
+    context=Depends(get_tenant),
+):
+    return create_child(db, context, submission_id, field_id, payload.request_key)

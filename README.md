@@ -173,4 +173,4 @@ Projeto em fase inicial de produto/MVP. As hipóteses comerciais e operacionais 
 
 ## Fundação implementada
 
-Consulte [ADR 001](docs/ADR-001-foundation.md) para API autenticada, migrations, bootstrap administrativo e testes. Formulários e telas do starter ainda são esboços.
+Consulte [ADR 001](docs/ADR-001-foundation.md) para API autenticada, migrations, bootstrap administrativo e testes. O backend inclui Form Builder, Runner, PERIOD e cálculos/SUBFORM; as telas do starter ainda são esboços. Veja também [ADR 0006](docs/adr/0006-subforms-calculations.md).

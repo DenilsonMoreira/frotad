@@ -36,6 +36,16 @@ class AnswerRead(BaseModel):
     value: Any
 
 
+class ChildCreate(StrictInput):
+    request_key: UUID
+
+
+class ChildRead(BaseModel):
+    field_id: UUID
+    submission_id: UUID
+    status: str
+
+
 class SubmissionRead(BaseModel):
     id: UUID
     form_version_id: UUID
@@ -51,3 +61,5 @@ class SubmissionRead(BaseModel):
     server_time: datetime
     answers: list[AnswerRead] = Field(default_factory=list)
     periods: list[PeriodRead] = Field(default_factory=list)
+
+    children: list[ChildRead] = Field(default_factory=list)

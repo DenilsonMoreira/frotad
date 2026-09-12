@@ -1,7 +1,7 @@
 from frotad.models.company import Branch, Company
 from frotad.models.fleet import Driver, Vehicle
 from frotad.models.identity import AccessToken, Membership, User
-from frotad.models.runner import FormAnswer, FormSubmission, PeriodValue
+from frotad.models.runner import FormAnswer, FormSubmission, PeriodValue, SubmissionRelation
 
 __all__ = ["AccessToken", "Branch", "Company", "Driver", "Membership", "User", "Vehicle"]
 
@@ -11,3 +11,5 @@ __all__ += ["Form", "FormVersion", "FormField"]
 
 
 __all__ += ["FormSubmission", "FormAnswer", "PeriodValue"]
+
+__all__ += ["SubmissionRelation"]

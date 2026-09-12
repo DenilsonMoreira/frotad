@@ -42,6 +42,21 @@ class EvidenceConfig(StrictInput):
     )
 
 
+class CalculatedConfig(StrictInput):
+    expression: dict
+
+    @model_validator(mode="after")
+    def safe_expression(self):
+        from frotad.services.formulas import validate
+
+        validate(self.expression)
+        return self
+
+
+class SubformConfig(StrictInput):
+    form_version_id: UUID
+
+
 class FieldCreate(StrictInput):
     key: str = Field(min_length=1, max_length=80, pattern=r"^[A-Za-z][A-Za-z0-9_]*$")
     label: str = Field(min_length=1, max_length=200)
@@ -51,18 +66,16 @@ class FieldCreate(StrictInput):
 
     @model_validator(mode="after")
     def validate_config(self):
-        if self.field_type in (FieldType.CALCULATED, FieldType.SUBFORM):
-            raise ValueError(
-                "calculated and subform configuration is reserved for the calculations phase"
-            )
         schema = {
             FieldType.PERIOD: PeriodConfig,
+            FieldType.CALCULATED: CalculatedConfig,
+            FieldType.SUBFORM: SubformConfig,
             FieldType.SINGLE_SELECT: SelectConfig,
             FieldType.MULTI_SELECT: SelectConfig,
             FieldType.FILE: EvidenceConfig,
             FieldType.PHOTO: EvidenceConfig,
         }.get(self.field_type, StrictInput)
-        self.config = schema.model_validate(self.config).model_dump()
+        self.config = schema.model_validate(self.config).model_dump(mode="json")
         return self
 
 
