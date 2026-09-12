@@ -36,3 +36,7 @@ postgres-data/
 
 *.db
 *.tsbuildinfo
+
+# Browser test artifacts
+playwright-report/
+test-results/

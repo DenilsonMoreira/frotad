@@ -52,7 +52,7 @@
 - [x] consulta de status ativo por submissão (projeção materializada futura)
 - [x] impedir concorrência quando configurado
 - [ ] correções auditadas
-- [ ] board em tempo real/polling inicial
+- [x] board em tempo real/polling inicial
 
 ## EPIC 6 — Relações e cálculos
 
@@ -72,13 +72,13 @@
 
 ## EPIC 8 — Dashboards piloto
 
-- [ ] status ao vivo
-- [ ] espera em obra
-- [ ] entregas/viagens
-- [ ] volume m³
-- [ ] diesel
-- [ ] L/m³
-- [ ] tendência diária
+- [x] status ao vivo
+- [x] espera em obra
+- [x] entregas/viagens
+- [x] volume m³
+- [x] diesel
+- [x] L/m³
+- [x] tendência diária
 
 ## EPIC 9 — Evidências
 
