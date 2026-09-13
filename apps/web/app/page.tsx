@@ -1,6 +1,8 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 import Link from "next/link";
+import { logout, useSession } from "../lib/session";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type Metrics = {
@@ -64,10 +66,8 @@ function Metric({
 }
 
 export default function DashboardPage() {
-  const [credentials, setCredentials] = useState<{
-    company: string;
-    token: string;
-  } | null>(null);
+  const router = useRouter();
+  const { session: credentials, error: sessionError } = useSession();
   const [data, setData] = useState<Dashboard | null>(null);
   const [day, setDay] = useState("");
   const [query, setQuery] = useState("");
@@ -77,18 +77,18 @@ export default function DashboardPage() {
   const request = useRef<AbortController | null>(null);
   const refresh = useCallback(async () => {
     if (!credentials) return;
+    if (credentials.is_system_admin && !credentials.company_id) {
+      router.replace("/admin");
+      return;
+    }
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/dashboard${day ? `?day=${day}` : ""}`,
+        `/api/backend/dashboard${day ? `?day=${day}` : ""}`,
         {
-          headers: {
-            Authorization: `Bearer ${credentials.token}`,
-            "X-Company-ID": credentials.company,
-          },
           cache: "no-store",
           signal: controller.signal,
         },
@@ -96,7 +96,7 @@ export default function DashboardPage() {
       if (!response.ok)
         throw new Error(
           response.status === 401
-            ? "Token inválido ou expirado. Desconecte e informe um novo token."
+            ? "Sessão expirada. Saia e entre novamente."
             : response.status === 403
               ? "Seu acesso não permite consultar esta operação."
               : "Não foi possível atualizar o dashboard. Tente novamente.",
@@ -112,7 +112,7 @@ export default function DashboardPage() {
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, [credentials, day]);
+  }, [credentials, day, router]);
   useEffect(() => {
     const initial = window.setTimeout(() => {
       void refresh();
@@ -144,6 +144,14 @@ export default function DashboardPage() {
         <nav aria-label="Navegação principal">
           <a href="#operation">◉ Operação ao vivo</a>
           <a href="#efficiency">▥ Eficiência e diesel</a>
+          {credentials &&
+            ["OWNER", "ADMIN"].includes(credentials.user.role ?? "") && (
+              <Link href="/usuarios">Usuários da empresa</Link>
+            )}
+          {credentials?.is_system_admin && (
+            <Link href="/admin">Administração do sistema</Link>
+          )}
+          <Link href="/conta">Minha conta</Link>
         </nav>
         <div className="sidebar-footer">
           Dados de hoje.
@@ -165,7 +173,9 @@ export default function DashboardPage() {
               className="secondary"
               onClick={() => {
                 request.current?.abort();
-                setCredentials(null);
+                void logout()
+                  .then(() => router.replace("/login"))
+                  .catch((cause) => setError(cause.message));
                 setData(null);
                 setError("");
                 setDay("");
@@ -176,52 +186,7 @@ export default function DashboardPage() {
           )}
         </header>
         {!credentials ? (
-          <section className="connect panel">
-            <div>
-              <p className="eyebrow">ACESSO AO PILOTO</p>
-              <h2>Conecte sua empresa</h2>
-              <p>
-                Use o identificador da empresa e o token fornecidos pelo
-                administrador.
-              </p>
-              <p className="muted">
-                O token fica apenas na memória desta página. Ao recarregar,
-                conecte novamente.
-              </p>
-            </div>
-            <form
-              onSubmit={(event) => {
-                event.preventDefault();
-                const form = new FormData(event.currentTarget);
-                setCredentials({
-                  company: String(form.get("company")).trim(),
-                  token: String(form.get("token")).trim(),
-                });
-                event.currentTarget.reset();
-              }}
-            >
-              <label>
-                Identificador da empresa
-                <input
-                  name="company"
-                  required
-                  pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
-                  placeholder="UUID da empresa"
-                  autoComplete="off"
-                />
-              </label>
-              <label>
-                Token de acesso
-                <input
-                  name="token"
-                  type="password"
-                  required
-                  autoComplete="off"
-                />
-              </label>
-              <button type="submit">Acessar operação →</button>
-            </form>
-          </section>
+          <p role="status">{sessionError || "Verificando sessão…"}</p>
         ) : (
           <>
             <div className="toolbar">

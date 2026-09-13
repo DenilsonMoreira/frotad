@@ -31,6 +31,10 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(200))
     email: Mapped[str] = mapped_column(String(254), unique=True)
     status: Mapped[str] = mapped_column(String(30), default="ACTIVE")
+    password_hash: Mapped[str | None] = mapped_column(String(256))
+    failed_logins: Mapped[int] = mapped_column(default=0, server_default="0")
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    is_system_admin: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
 
 
 class Membership(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -59,5 +63,12 @@ class AuditEvent(UUIDPrimaryKeyMixin, Base):
     company_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("companies.id"), index=True)
     actor_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     entity_id: Mapped[uuid.UUID]
+    action: Mapped[str] = mapped_column(String(80))
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class SystemAuditEvent(UUIDPrimaryKeyMixin, Base):
+    __tablename__ = "system_audit_events"
+    actor_user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(String(80))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

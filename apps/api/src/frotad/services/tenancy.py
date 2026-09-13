@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from frotad.models.company import Company
 from frotad.models.identity import AccessToken, Membership, Role, User
 
 
@@ -21,10 +22,18 @@ class TenantContext:
     user_id: UUID
     branch_id: UUID | None
     role: Role
+    system_form_admin: bool = False
 
     def require(self, capability: str) -> None:
+        # System administrators may explicitly manage a company's definitions,
+        # without gaining access to its submissions, fleet or users implicitly.
+        if self.system_form_admin:
+            if capability not in {"forms:read", "forms:write"}:
+                raise DomainError(403, "permission_denied")
+            return
         permissions = {
             Role.OWNER: {
+                "users:manage",
                 "fleet:read",
                 "forms:read",
                 "forms:write",
@@ -33,6 +42,7 @@ class TenantContext:
                 "runner:create",
             },
             Role.ADMIN: {
+                "users:manage",
                 "fleet:read",
                 "forms:read",
                 "forms:write",
@@ -43,7 +53,6 @@ class TenantContext:
             Role.MANAGER: {
                 "fleet:read",
                 "forms:read",
-                "forms:write",
                 "runner:read",
                 "runner:write",
                 "runner:create",
@@ -57,7 +66,7 @@ class TenantContext:
             raise DomainError(403, "permission_denied")
 
 
-def resolve_tenant(db: Session, token: str, company_id: UUID) -> TenantContext:
+def resolve_user(db: Session, token: str) -> User:
     user = db.scalar(
         select(User)
         .join(AccessToken)
@@ -70,6 +79,11 @@ def resolve_tenant(db: Session, token: str, company_id: UUID) -> TenantContext:
     )
     if user is None:
         raise DomainError(401, "invalid_credentials")
+    return user
+
+
+def resolve_tenant(db: Session, token: str, company_id: UUID) -> TenantContext:
+    user = resolve_user(db, token)
     membership = db.scalar(
         select(Membership).where(
             Membership.user_id == user.id,
@@ -78,5 +92,7 @@ def resolve_tenant(db: Session, token: str, company_id: UUID) -> TenantContext:
         )
     )
     if membership is None:
+        if user.is_system_admin and db.get(Company, company_id) is not None:
+            return TenantContext(company_id, user.id, None, Role.ADMIN, system_form_admin=True)
         raise DomainError(403, "membership_required")
     return TenantContext(company_id, user.id, membership.branch_id, membership.role)

@@ -94,3 +94,14 @@
 - [ ] feedback in-app simples
 - [ ] telemetria de produto
 - [ ] relatório de uso do piloto
+
+## EPIC 11 — Acesso e administração
+
+- [x] login com e-mail/senha e logout
+- [x] cadastro de empresa e administrador responsável
+- [x] administrador do sistema separado do administrador da empresa
+- [x] cadastro e ativação/desativação de usuários por empresa
+- [x] criação/publicação de formulários restrita a administradores
+- [x] troca de senha pelo usuário
+- [ ] recuperação e verificação de e-mail
+- [ ] editor visual de formulários para administradores

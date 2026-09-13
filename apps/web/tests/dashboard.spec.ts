@@ -36,19 +36,19 @@ test("connects, filters, handles stale data and disconnects without overflow", a
     ],
   };
   let fail = false;
-  await page.route("**/api/v1/dashboard*", (route) =>
+  await page.route("**/api/backend/dashboard*", (route) =>
     route.fulfill({
       status: fail ? 503 : 200,
       contentType: "application/json",
       body: JSON.stringify(payload),
     }),
   );
-  await page.goto("/");
+  await page.goto("/login");
+  await page.getByLabel("E-mail", { exact: true }).fill("owner@example.test");
   await page
-    .getByLabel("Identificador da empresa")
-    .fill("11111111-1111-1111-1111-111111111111");
-  await page.getByLabel("Token de acesso").fill("browser-test-token");
-  await page.getByRole("button", { name: "Acessar operação" }).click();
+    .getByLabel("Senha", { exact: true })
+    .fill("Frase de teste segura 123");
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(page.getByRole("heading", { name: "FD-107" })).toBeVisible();
   await expect(page.getByText("0h 42min")).toBeVisible();
   await expect(
@@ -71,11 +71,13 @@ test("connects, filters, handles stale data and disconnects without overflow", a
   await page.getByLabel("Buscar na operação").fill("");
   fail = true;
   await page.getByRole("button", { name: "Atualizar", exact: true }).click();
-  await expect(page.getByRole("main").getByRole("alert")).toContainText("última atualização");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "última atualização",
+  );
   await expect(page.getByRole("heading", { name: "FD-107" })).toBeVisible();
   await page.getByRole("button", { name: "Desconectar" }).click();
   await expect(
-    page.getByRole("heading", { name: "Conecte sua empresa" }),
+    page.getByRole("heading", { name: "Acesse sua conta" }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "FD-107" })).toHaveCount(0);
 });
