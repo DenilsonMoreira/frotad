@@ -49,9 +49,15 @@ def session(db, user, company_id=None):
         .order_by(Membership.created_at, Membership.id)
         .limit(1)
     )
-    if member is None and (not user.is_system_admin or company_id is not None):
+    if member is None and not user.is_system_admin:
         raise DomainError(403, "membership_required")
-    company = db.get(Company, member.company_id) if member else None
+    company = (
+        db.get(Company, member.company_id)
+        if member
+        else (db.get(Company, company_id) if company_id else None)
+    )
+    if company_id is not None and company is None:
+        raise DomainError(404, "not_found")
     return SessionRead(
         company_id=company.id if company else None,
         company_name=company.name if company else None,

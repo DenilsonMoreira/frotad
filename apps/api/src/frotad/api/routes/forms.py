@@ -1,12 +1,22 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from frotad.api.dependencies import get_db, get_tenant
-from frotad.schemas.forms import FieldCreate, FormCreate, ReorderFields, VersionRead
+from frotad.schemas.forms import FieldCreate, FormCreate, FormSummary, ReorderFields, VersionRead
 from frotad.services import forms
 
 router = APIRouter(tags=["forms"])
+
+
+@router.get("/forms", response_model=list[FormSummary])
+def listing(
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
+    db=Depends(get_db),
+    context=Depends(get_tenant),
+):
+    return forms.list_forms(db, context, offset, limit)
 
 
 @router.post("/forms", response_model=VersionRead, status_code=201)

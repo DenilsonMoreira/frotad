@@ -28,12 +28,20 @@ export default function AdminShell({
         </p>
         <nav aria-label="Administração">
           {session.is_system_admin ? (
-            <Link href="/admin">Empresas</Link>
+            <>
+              <Link href="/admin">Empresas</Link>
+              {session.company_id && (
+                <Link href="/formularios">Formulários da empresa</Link>
+              )}
+            </>
           ) : (
             <>
               <Link href="/">Operação ao vivo</Link>
               {["OWNER", "ADMIN"].includes(session.user.role ?? "") && (
                 <Link href="/usuarios">Usuários da empresa</Link>
+              )}
+              {["OWNER", "ADMIN"].includes(session.user.role ?? "") && (
+                <Link href="/formularios">Formulários</Link>
               )}
             </>
           )}

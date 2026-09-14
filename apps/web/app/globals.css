@@ -35,7 +35,8 @@ a {
 }
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
   min-height: 44px;
   border-radius: 7px;
@@ -58,12 +59,17 @@ button:disabled {
   border-color: var(--color-border);
 }
 input,
-select {
+select,
+textarea {
   width: 100%;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
   padding: 10px 12px;
+}
+textarea {
+  min-height: 96px;
+  resize: vertical;
 }
 label {
   display: grid;
@@ -479,6 +485,51 @@ footer {
   justify-content: space-between;
   gap: 16px;
   margin-top: 20px;
+}
+.form-list,
+.field-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+.form-item,
+.field-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  padding: 16px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.form-item:hover {
+  background: var(--color-brand-100);
+}
+.form-item p,
+.field-item p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.field-item > div:last-child {
+  display: flex;
+  gap: 8px;
+}
+.compact {
+  min-width: 44px;
+  padding: 8px;
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  min-height: 44px;
+}
+.checkbox input {
+  width: 22px;
+  min-height: 22px;
 }
 @media (max-width: 760px) {
   .form-grid {

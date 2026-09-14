@@ -33,7 +33,7 @@
 - [x] validation config (tipos básicos, PERIOD, seleções, evidências, cálculos e SUBFORM)
 - [x] publish
 - [ ] archive
-- [ ] preview
+- [x] preview/editor visual básico
 
 ## EPIC 4 — Form Runner
 
@@ -104,4 +104,4 @@
 - [x] criação/publicação de formulários restrita a administradores
 - [x] troca de senha pelo usuário
 - [ ] recuperação e verificação de e-mail
-- [ ] editor visual de formulários para administradores
+- [x] editor visual de formulários para administradores

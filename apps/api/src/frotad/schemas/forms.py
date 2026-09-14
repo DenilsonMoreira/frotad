@@ -110,3 +110,14 @@ class VersionRead(BaseModel):
     published_at: datetime | None
     schema_hash: str | None
     fields: list[FieldRead]
+
+
+class FormSummary(BaseModel):
+    id: UUID
+    code: str
+    name: str
+    description: str | None
+    status: str
+    latest_version_id: UUID
+    latest_version: int
+    latest_published_at: datetime | None
