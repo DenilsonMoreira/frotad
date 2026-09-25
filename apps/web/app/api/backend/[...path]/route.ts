@@ -68,9 +68,13 @@ async function proxy(
         : NextResponse.json(data, { status: upstream.status });
     response.headers.set("Cache-Control", "no-store");
     if (successfulLogin) {
+      const secureCookie =
+        process.env.SESSION_COOKIE_SECURE === undefined
+          ? process.env.NODE_ENV === "production"
+          : process.env.SESSION_COOKIE_SECURE === "true";
       const options = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: secureCookie,
         sameSite: "strict" as const,
         path: "/",
         expires: new Date(data.expires_at),
