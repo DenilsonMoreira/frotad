@@ -56,6 +56,9 @@ services:
       context: ./apps/web
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      API_URL: http://api:8000
+      APP_ORIGIN: http://localhost:3000
+      SESSION_COOKIE_SECURE: "false"
     ports:
       - "3000:3000"
     depends_on:
