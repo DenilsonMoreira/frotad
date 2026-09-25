@@ -30,7 +30,7 @@
 - [x] forms
 - [x] draft/version
 - [x] fields
-- [x] validation config (tipos básicos, PERIOD, seleções e evidências; cálculos/SUBFORM na fase 4)
+- [x] validation config (tipos básicos, PERIOD, seleções, evidências, cálculos e SUBFORM)
 - [x] publish
 - [ ] archive
 - [ ] preview
@@ -56,12 +56,12 @@
 
 ## EPIC 6 — Relações e cálculos
 
-- [ ] SUBFORM
-- [ ] parent/child submissions
-- [ ] COUNT children
-- [ ] SUM child field
-- [ ] arithmetic calculations
-- [ ] divide-by-zero policy
+- [x] SUBFORM
+- [x] parent/child submissions
+- [x] COUNT children
+- [x] SUM child field
+- [x] arithmetic calculations
+- [x] divide-by-zero policy
 
 ## EPIC 7 — Templates concreteira
 

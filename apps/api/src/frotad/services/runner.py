@@ -27,6 +27,8 @@ SUPPORTED = {
     FieldType.VEHICLE_REFERENCE,
     FieldType.DRIVER_REFERENCE,
     FieldType.PERIOD,
+    FieldType.CALCULATED,
+    FieldType.SUBFORM,
 }
 VALUE_COLUMNS = (
     "value_text",
@@ -118,6 +120,9 @@ def answer_value(answer):
 
 
 def view(db, record):
+    from frotad.services.calculations import child_records, values
+
+    computed = values(db, record)
     server_time = now()
     return SubmissionRead(
         id=record.id,
@@ -140,7 +145,14 @@ def view(db, record):
         submitted_at=utc(record.submitted_at) if record.submitted_at else None,
         server_time=server_time,
         answers=[
-            AnswerRead(field_id=a.field_id, value=answer_value(a)) for a in answers(db, record)
+            AnswerRead(field_id=a.field_id, value=answer_value(a))
+            for a in answers(db, record)
+            if a.field_id not in computed
+        ]
+        + [AnswerRead(field_id=field_id, value=value) for field_id, value in computed.items()],
+        children=[
+            {"field_id": rel.relation_field_id, "submission_id": child.id, "status": child.status}
+            for rel, child in child_records(db, record)
         ],
         periods=[
             PeriodRead(
@@ -169,8 +181,17 @@ def reference(db, context, model, record_id):
     return obj
 
 
-def create(db, context, payload):
-    context.require("runner:create")
+def validate_calculations(db, record):
+    from frotad.services.calculations import values
+
+    try:
+        values(db, record)
+    except DomainError:
+        db.rollback()
+        raise
+
+
+def new_submission(db, context, payload):
     version = db.scalar(
         select(FormVersion)
         .join(Form)
@@ -210,7 +231,14 @@ def create(db, context, payload):
     )
     db.add(record)
     db.flush()
+    validate_calculations(db, record)
     audit(db, context, record.id, "submission.created")
+    return record
+
+
+def create(db, context, payload):
+    context.require("runner:create")
+    record = new_submission(db, context, payload)
     commit(db)
     return view(db, record)
 
@@ -231,6 +259,8 @@ def list_submissions(db, context, offset, limit):
 
 def typed_value(db, context, record, definition, value):
     kind = definition.field_type
+    if kind in (FieldType.CALCULATED, FieldType.SUBFORM):
+        raise DomainError(422, "server_managed_field")
     if kind not in SUPPORTED or kind == FieldType.PERIOD:
         raise DomainError(
             422, "use_period_commands" if kind == FieldType.PERIOD else "unsupported_runner_field"
@@ -332,6 +362,8 @@ def save_answer(db, context, submission_id, field_id, value):
     for col in VALUE_COLUMNS:
         setattr(answer, col, values.get(col))
     db.add(answer)
+    db.flush()
+    validate_calculations(db, record)
     audit(db, context, record.id, "submission.answer_saved")
     commit(db)
     return view(db, record)
@@ -409,6 +441,12 @@ def submit(db, context, submission_id):
             for col in VALUE_COLUMNS
         )
     }
+    from frotad.services.calculations import prepare_submit
+
+    computed, completed_subforms = prepare_submit(db, record)
+    provided |= {
+        field_id for field_id, value in computed.items() if value is not None
+    } | completed_subforms
     required = db.scalars(
         select(FormField).where(
             FormField.form_version_id == record.form_version_id, FormField.required.is_(True)
@@ -418,6 +456,10 @@ def submit(db, context, submission_id):
         f.id not in (closed if f.field_type == FieldType.PERIOD else provided) for f in required
     ):
         raise DomainError(422, "required_answers_missing")
+    for field_id, value in computed.items():
+        answer = new_answer(record, field_id)
+        answer.value_decimal = value
+        db.add(answer)
     record.status = "SUBMITTED"
     record.submitted_at = now()
     audit(db, context, record.id, "form.submitted")

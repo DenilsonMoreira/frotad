@@ -103,3 +103,38 @@ class PeriodValue(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     duration_seconds: Mapped[int | None]
     status_key: Mapped[str] = mapped_column(String(80))
     allow_concurrent: Mapped[bool] = mapped_column(Boolean)
+
+
+class SubmissionRelation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "submission_relations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["parent_submission_id", "company_id"],
+            ["form_submissions.id", "form_submissions.company_id"],
+            name="fk_relation_parent_company",
+        ),
+        ForeignKeyConstraint(
+            ["child_submission_id", "company_id"],
+            ["form_submissions.id", "form_submissions.company_id"],
+            name="fk_relation_child_company",
+        ),
+        ForeignKeyConstraint(
+            ["parent_submission_id", "parent_version_id"],
+            ["form_submissions.id", "form_submissions.form_version_id"],
+            name="fk_relation_parent_version",
+        ),
+        ForeignKeyConstraint(
+            ["parent_version_id", "relation_field_id"],
+            ["form_fields.form_version_id", "form_fields.id"],
+            name="fk_relation_field_version",
+        ),
+        UniqueConstraint("child_submission_id"),
+        UniqueConstraint("parent_submission_id", "request_key"),
+        CheckConstraint("parent_submission_id <> child_submission_id", name="relation_not_self"),
+    )
+    company_id: Mapped[uuid.UUID] = mapped_column(index=True)
+    parent_submission_id: Mapped[uuid.UUID] = mapped_column(index=True)
+    child_submission_id: Mapped[uuid.UUID]
+    parent_version_id: Mapped[uuid.UUID]
+    relation_field_id: Mapped[uuid.UUID]
+    request_key: Mapped[uuid.UUID]

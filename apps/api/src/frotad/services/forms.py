@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from frotad.models.forms import Form, FormField, FormStatus, FormVersion
+from frotad.models.forms import FieldType, Form, FormField, FormStatus, FormVersion
 from frotad.models.identity import AuditEvent
 from frotad.schemas.forms import FieldCreate, FieldRead, FormCreate, VersionRead
 from frotad.services.tenancy import DomainError, TenantContext
@@ -115,6 +115,10 @@ def add_field(db, context, version_id, payload: FieldCreate):
         raise DomainError(422, "field_limit_reached")
     if any(field.key == payload.key for field in existing):
         raise DomainError(409, "field_key_exists")
+    if payload.field_type == FieldType.SUBFORM:
+        from frotad.services.calculations import child_version
+
+        child_version(db, context.company_id, payload.config)
     field = FormField(form_version_id=version.id, position=len(existing), **payload.model_dump())
     db.add(field)
     audit(db, context, version.id, "form.field_added")
@@ -141,6 +145,9 @@ def publish(db, context, version_id):
     definition = fields(db, version.id)
     if not definition:
         raise DomainError(422, "empty_form")
+    from frotad.services.calculations import validate_definition
+
+    validate_definition(db, context.company_id, definition)
     snapshot = {
         "name": version.name,
         "description": version.description,
