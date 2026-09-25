@@ -5,12 +5,23 @@ from fastapi import Depends, Header
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from frotad.db.session import SessionLocal
-from frotad.services.tenancy import DomainError, resolve_tenant
+from frotad.services.tenancy import DomainError, resolve_tenant, resolve_user
 
 
 def get_db():
     with SessionLocal() as db:
         yield db
+
+
+def get_user(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None, Depends(HTTPBearer(auto_error=False))
+    ],
+    db=Depends(get_db),
+):
+    if credentials is None:
+        raise DomainError(401, "authentication_required")
+    return resolve_user(db, credentials.credentials)
 
 
 def get_tenant(
