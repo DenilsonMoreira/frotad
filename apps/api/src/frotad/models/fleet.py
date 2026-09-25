@@ -5,6 +5,7 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     Numeric,
     String,
@@ -20,6 +21,7 @@ class Vehicle(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "vehicles"
     __table_args__ = (
         UniqueConstraint("company_id", "fleet_number"),
+        Index("uq_vehicles_company_id_id", "company_id", "id", unique=True),
         ForeignKeyConstraint(["company_id", "branch_id"], ["branches.company_id", "branches.id"]),
     )
 
@@ -43,6 +45,7 @@ class Driver(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     __tablename__ = "drivers"
     __table_args__ = (
         UniqueConstraint("company_id", "employee_code"),
+        Index("uq_drivers_company_id_id", "company_id", "id", unique=True),
         ForeignKeyConstraint(
             ["company_id", "user_id"], ["memberships.company_id", "memberships.user_id"]
         ),

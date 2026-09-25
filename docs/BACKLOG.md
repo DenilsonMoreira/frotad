@@ -37,20 +37,20 @@
 
 ## EPIC 4 — Form Runner
 
-- [ ] criar submissão
-- [ ] salvar draft
-- [ ] enviar
-- [ ] respostas tipadas
-- [ ] validações
+- [x] criar submissão
+- [x] salvar draft
+- [x] enviar
+- [x] respostas tipadas
+- [x] validações
 - [ ] mobile UX
 
 ## EPIC 5 — PERIOD / tempo real
 
-- [ ] start period
-- [ ] finish period
-- [ ] elapsed duration
-- [ ] current status projection
-- [ ] impedir concorrência quando configurado
+- [x] start period
+- [x] finish period
+- [x] elapsed duration
+- [x] consulta de status ativo por submissão (projeção materializada futura)
+- [x] impedir concorrência quando configurado
 - [ ] correções auditadas
 - [ ] board em tempo real/polling inicial
 

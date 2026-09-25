@@ -1,36 +1,17 @@
-import os
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 
 import pytest
-from alembic.config import Config
-from sqlalchemy import create_engine, delete, update
+from sqlalchemy import delete, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from alembic import command
-from frotad.core.config import settings
 from frotad.models import Company, User
 from frotad.models.forms import FormField, FormVersion
 from frotad.models.identity import Role
 from frotad.schemas.forms import FieldCreate, FormCreate
 from frotad.services import forms
 from frotad.services.tenancy import DomainError, TenantContext
-
-
-@pytest.fixture
-def migrated_engine(tmp_path):
-    original = settings.database_url
-    settings.database_url = os.getenv("TEST_DATABASE_URL", f"sqlite:///{tmp_path / 'forms.db'}")
-    config = Config("alembic.ini")
-    engine = create_engine(settings.database_url)
-    command.upgrade(config, "head")
-    try:
-        yield engine
-    finally:
-        command.downgrade(config, "base")
-        engine.dispose()
-        settings.database_url = original
 
 
 def published(engine):
