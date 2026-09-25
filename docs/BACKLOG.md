@@ -27,11 +27,11 @@
 
 ## EPIC 3 — Form Builder
 
-- [ ] forms
-- [ ] draft/version
-- [ ] fields
-- [ ] validation config
-- [ ] publish
+- [x] forms
+- [x] draft/version
+- [x] fields
+- [x] validation config (tipos básicos, PERIOD, seleções e evidências; cálculos/SUBFORM na fase 4)
+- [x] publish
 - [ ] archive
 - [ ] preview
 
