@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from frotad.models.forms import FieldType, Form, FormField, FormStatus, FormVersion
 from frotad.models.identity import AuditEvent
-from frotad.schemas.forms import FieldCreate, FieldRead, FormCreate, VersionRead
+from frotad.schemas.forms import FieldCreate, FieldRead, FormCreate, FormSummary, VersionRead
 from frotad.services.tenancy import DomainError, TenantContext
 
 
@@ -105,6 +105,38 @@ def create_form(db, context, payload: FormCreate):
 def get_version(db, context, version_id):
     _, version = scoped_version(db, context, version_id)
     return view(db, version)
+
+
+def list_forms(db, context, offset=0, limit=50):
+    context.require("forms:read")
+    records = db.scalars(
+        select(Form)
+        .where(Form.company_id == context.company_id)
+        .order_by(Form.name, Form.id)
+        .offset(offset)
+        .limit(limit)
+    ).all()
+    result = []
+    for form in records:
+        version = db.scalar(
+            select(FormVersion)
+            .where(FormVersion.form_id == form.id)
+            .order_by(FormVersion.version.desc())
+            .limit(1)
+        )
+        result.append(
+            FormSummary(
+                id=form.id,
+                code=form.code,
+                name=form.name,
+                description=form.description,
+                status=form.status.value,
+                latest_version_id=version.id,
+                latest_version=version.version,
+                latest_published_at=version.published_at,
+            )
+        )
+    return result
 
 
 def add_field(db, context, version_id, payload: FieldCreate):

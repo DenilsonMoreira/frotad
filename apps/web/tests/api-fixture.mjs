@@ -2,6 +2,7 @@
 import { createServer } from "node:http";
 const company = "11111111-1111-1111-1111-111111111111";
 const sessions = new Map();
+const forms = [];
 createServer(async (req, res) => {
   const send = (status, data) => {
     res.writeHead(status, { "Content-Type": "application/json" });
@@ -69,6 +70,48 @@ createServer(async (req, res) => {
         ? { id: crypto.randomUUID(), ...payload, password: undefined }
         : [session.user],
     );
+  if (req.url === "/api/v1/forms" && req.method === "GET")
+    return send(200, forms.filter((form) => !forms.some((other) =>
+      other.form_id === form.form_id && other.version > form.version,
+    )).map((form) => ({
+      id: form.form_id, code: form.code, name: form.name, description: form.description,
+      status: form.published_at ? "PUBLISHED" : "DRAFT", latest_version_id: form.id,
+      latest_version: form.version, latest_published_at: form.published_at,
+    })));
+  if (req.url === "/api/v1/forms" && req.method === "POST") {
+    const form = { id: crypto.randomUUID(), form_id: crypto.randomUUID(), version: 1,
+      name: payload.name, description: payload.description || null, code: payload.code,
+      published_at: null, schema_hash: null, fields: [] };
+    forms.push(form);
+    return send(201, form);
+  }
+  const versionMatch = req.url.match(/^\/api\/v1\/form-versions\/([0-9a-f-]+)(?:\/(fields|field-order|publish|clone))?$/);
+  if (versionMatch) {
+    const form = forms.find((item) => item.id === versionMatch[1]);
+    if (!form) return send(404, { error: { code: "not_found" } });
+    const action = versionMatch[2];
+    if (!action) return send(200, form);
+    if (action === "fields") {
+      form.fields.push({ id: crypto.randomUUID(), position: form.fields.length, ...payload });
+      return send(201, form);
+    }
+    if (action === "field-order") {
+      form.fields.sort((a, b) => payload.field_ids.indexOf(a.id) - payload.field_ids.indexOf(b.id));
+      form.fields.forEach((field, index) => field.position = index);
+      return send(200, form);
+    }
+    if (action === "publish") {
+      form.published_at = new Date().toISOString(); form.schema_hash = "test-hash";
+      return send(200, form);
+    }
+    if (action === "clone") {
+      const clone = { ...form, id: crypto.randomUUID(), version: form.version + 1,
+        published_at: null, schema_hash: null,
+        fields: form.fields.map((field) => ({ ...field, id: crypto.randomUUID() })) };
+      forms.push(clone);
+      return send(201, clone);
+    }
+  }
   if (req.url.startsWith("/api/v1/dashboard")) {
     const metrics = {
       day: "2026-09-13",

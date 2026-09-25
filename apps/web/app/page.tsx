@@ -146,7 +146,10 @@ export default function DashboardPage() {
           <a href="#efficiency">▥ Eficiência e diesel</a>
           {credentials &&
             ["OWNER", "ADMIN"].includes(credentials.user.role ?? "") && (
-              <Link href="/usuarios">Usuários da empresa</Link>
+              <>
+                <Link href="/usuarios">Usuários da empresa</Link>
+                <Link href="/formularios">Formulários</Link>
+              </>
             )}
           {credentials?.is_system_admin && (
             <Link href="/admin">Administração do sistema</Link>

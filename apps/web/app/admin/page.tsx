@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { api, useSession } from "../../lib/session";
 import AdminShell from "../components/admin-shell";
@@ -6,6 +7,7 @@ import CompanyForm from "../components/company-form";
 
 type Company = { id: string; name: string; slug: string; timezone: string };
 export default function SystemPage() {
+  const router = useRouter();
   const { session, error: sessionError } = useSession();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [error, setError] = useState("");
@@ -57,6 +59,7 @@ export default function SystemPage() {
                 <th>Empresa</th>
                 <th>Identificador</th>
                 <th>Fuso horário</th>
+                <th>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -65,6 +68,21 @@ export default function SystemPage() {
                   <th scope="row">{company.name}</th>
                   <td>{company.slug}</td>
                   <td>{company.timezone}</td>
+                  <td>
+                    <button
+                      className="secondary"
+                      onClick={async () => {
+                        await fetch("/api/company-context", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ company_id: company.id }),
+                        });
+                        router.push("/formularios");
+                      }}
+                    >
+                      Gerenciar formulários
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -17,7 +17,14 @@ async function proxy(
 ) {
   const path = (await context.params).path.join("/");
   const methods =
-    allowed[path] ?? (/^users\/[0-9a-f-]{36}$/.test(path) ? ["PATCH"] : []);
+    allowed[path] ??
+    (/^users\/[0-9a-f-]{36}$/.test(path)
+      ? ["PATCH"]
+      : path === "forms"
+        ? ["GET", "POST"]
+        : /^form-versions\/[0-9a-f-]{36}(\/(fields|field-order|publish|clone))?$/.test(path)
+          ? path.endsWith("field-order") ? ["PUT"] : path.match(/\/(fields|publish|clone)$/) ? ["POST"] : ["GET"]
+          : []);
   if (!methods.includes(request.method))
     return new NextResponse(null, { status: 404 });
   // NextURL canonicalizes loopback IPs; Host preserves the browser's actual origin.
@@ -89,4 +96,4 @@ async function proxy(
   }
 }
 
-export { proxy as GET, proxy as POST, proxy as PATCH };
+export { proxy as GET, proxy as POST, proxy as PUT, proxy as PATCH };

@@ -133,3 +133,57 @@ test("public registration, denied system area and CSRF protection", async ({
     page.getByRole("heading", { name: "Acesso restrito" }),
   ).toBeVisible();
 });
+
+test("company administrator builds, reorders and publishes a form", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/login");
+  await page.getByLabel("E-mail", { exact: true }).fill("forms@example.test");
+  await page.getByLabel("Senha", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  await page.getByRole("link", { name: "Formulários" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Formulários", exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Código").fill("FORM_TESTE");
+  await page.getByLabel("Nome", { exact: true }).fill("Formulário de teste");
+  await page.getByRole("button", { name: "Criar rascunho" }).click();
+  await expect(page.getByText("Rascunho em edição")).toBeVisible();
+
+  await page.getByLabel("Chave técnica").fill("wait");
+  await page.getByLabel("Rótulo").fill("Aguardando na obra");
+  await page.getByLabel("Tipo").selectOption("PERIOD");
+  await page.getByLabel("Chave do status").fill("WAITING_AT_SITE");
+  await page.getByLabel("Nome do status").fill("Aguardando na obra");
+  await page.getByRole("button", { name: "Adicionar campo" }).click();
+  await expect(page.getByText("wait · Período/status")).toBeVisible();
+
+  await page.getByLabel("Chave técnica").fill("volume_m3");
+  await page.getByLabel("Rótulo").fill("Volume entregue");
+  await page.getByLabel("Tipo").selectOption("DECIMAL");
+  await page.getByRole("button", { name: "Adicionar campo" }).click();
+  await page
+    .getByRole("button", { name: "Mover Volume entregue para cima" })
+    .click();
+  await expect(page.locator(".field-item").first()).toContainText(
+    "Volume entregue",
+  );
+
+  page.on("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Publicar versão" }).click();
+  await expect(page.getByText("Versão publicada")).toBeVisible();
+  await expect(page.getByText("Imutável")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("form-builder.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Criar nova versão editável" })
+    .click();
+  await expect(page.getByText("Rascunho em edição")).toBeVisible();
+});

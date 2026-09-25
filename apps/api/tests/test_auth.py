@@ -248,3 +248,6 @@ def test_lockout_and_only_admins_create_forms(client, db):
         ).status_code
         == 201
     )
+    listed = client.get("/api/v1/forms", headers=headers(owner))
+    assert listed.status_code == 200
+    assert listed.json()[0]["code"] == "YES"
