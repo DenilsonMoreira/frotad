@@ -33,3 +33,6 @@ postgres-data/
 
 # Logs
 *.log
+
+*.db
+*.tsbuildinfo

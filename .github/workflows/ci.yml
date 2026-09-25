@@ -7,6 +7,20 @@ on:
 jobs:
   api:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: frotad_test
+          POSTGRES_USER: frotad
+          POSTGRES_PASSWORD: frotad
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U frotad -d frotad_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://frotad:frotad@localhost:5432/frotad_test
     defaults:
       run:
         working-directory: apps/api
@@ -29,7 +43,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: npm install
+      - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
